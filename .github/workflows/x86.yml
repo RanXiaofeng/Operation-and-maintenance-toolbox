@@ -1,76 +1,79 @@
-name: Build and Release Windows Application
+name: Build WPF App
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+  # 手动触发构建
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
     strategy:
       matrix:
-        arch: [x86, x64, arm]  # 支持的架构
+        architecture: [x86, x64, arm64]
+        configuration: [Release]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 1  # 限制获取的提交深度，提高速度
+    - name: 检出代码
+      uses: actions/checkout@v3
+      
+    - name: 设置 .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: '7.0.x'  # 指定 .NET SDK 版本
+    - name: 还原依赖
+      run: dotnet restore -r win-${{ matrix.architecture }}
 
-      - name: Restore dependencies
-        run: dotnet restore ./工具箱.sln
-        continue-on-error: false  # 确保失败时停止
-        env:
-          DOTNET_CLI_TELEMETRY_OPTOUT: 1  # 关闭 .NET CLI 的遥测
+    - name: 构建
+      run: |
+        dotnet publish 工具箱.csproj `
+          -c ${{ matrix.configuration }} `
+          -r win-${{ matrix.architecture }} `
+          --self-contained true `
+          -p:PublishSingleFile=true `
+          -p:IncludeNativeLibrariesForSelfExtract=true `
+          -p:EnableCompressionInSingleFile=true `
+          -o publish/${{ matrix.architecture }}
 
-      - name: Build the application
-        run: dotnet build ./工具箱.sln --configuration Release --runtime ${{ matrix.arch }}
-        continue-on-error: false  # 确保失败时停止
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v3
+      with:
+        name: 运维工具箱-${{ matrix.architecture }}
+        path: publish/${{ matrix.architecture }}
 
-      - name: Publish the application
-        run: dotnet publish ./工具箱.sln --configuration Release --runtime ${{ matrix.arch }} --self-contained true --output ./output/${{ matrix.arch }}
-        continue-on-error: false  # 确保失败时停止
-
-      - name: Check publish output
-        run: |
-          if [ ! -d "./output/${{ matrix.arch }}" ]; then
-            echo "🔴 Publish output for ${{ matrix.arch }} not found!"
-            exit 1
-          else
-            echo "🟢 Successfully published for ${{ matrix.arch }}."
-          fi
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ matrix.arch }}-output
-          path: ./output/${{ matrix.arch }}
-
-  release:
+  create-release:
     needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: 下载所有构建产物
+      uses: actions/download-artifact@v3
 
-      - name: Upload release assets
-        uses: softprops/action-gh-release@v1
-        with:
-          tag: ${{ github.run_number }}  # 使用运行号作为标签
-          files: |
-            ./output/x64/*.exe
-            ./output/x86/*.exe
-            ./output/arm/*.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: 创建发布压缩包
+      run: |
+        foreach ($arch in @('x86', 'x64', 'arm64')) {
+          $zipPath = "运维工具箱-$arch.zip"
+          if (Test-Path $zipPath) { Remove-Item $zipPath } # 清理旧的压缩包
+          Compress-Archive -Path "运维工具箱-$arch/*" -DestinationPath $zipPath
+          echo "Created zip: $zipPath" # 调试信息
+        }
+
+    - name: 创建发布
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: |
+          运维工具箱-x86.zip
+          运维工具箱-x64.zip
+          运维工具箱-arm64.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
