@@ -1,6 +1,6 @@
 # 运维工具箱 (Operations Maintenance Toolbox) 🛠️
 
-![.Net](https://img.shields.io/badge/.NET-6.0-512BD4)
+![.Net](https://img.shields.io/badge/.NET-7.0-512BD4)
 ![Platform](https://img.shields.io/badge/Platform-Windows-0078D6)
 ![Release](https://img.shields.io/badge/Release-v1.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
@@ -14,7 +14,7 @@
 - 公司：小峰工作室
 
 ## 🔧 技术规格
-- 开发框架：.NET 6.0 WPF
+- 开发框架：.NET 7.0 WPF
 - 目标平台：Windows
 - 打包方式：单文件发布
 - 安全性：已签名程序集
