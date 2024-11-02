@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+        <RootNamespace>SimpleToolbox</RootNamespace>
+        <PublishSingleFile>true</PublishSingleFile>
+        <PackageId>运维工具箱</PackageId>
+        <Title>运维工具箱</Title>
+        <Authors>小峰</Authors>
+        <Description>本程序有小峰专属打造的一个运维工具箱</Description>
+        <Copyright>Copyright © 2024 小峰工具站</Copyright>
+        <Company>小峰工作室</Company>
+        <Product>运维工具箱</Product>
+        <ApplicationIcon>PC.ico</ApplicationIcon>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>运维工具箱.snk</AssemblyOriginatorKeyFile>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Management" Version="7.0.0" />
+    </ItemGroup>
+
+    <!-- 自动包含 Resources 目录下的所有文件作为嵌入资源 -->
+    <ItemGroup>
+        <EmbeddedResource Include="Resources\geek\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.geek.%(Recurs iveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\Dism++\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.Dism++.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\Conversion\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.Conversion.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\IObitUnlocker\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.IObitUnlocker.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\dControl\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.dControl.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\Wub\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.Wub.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\HEUkms\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.HEUkms.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\CPU-Z\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.CPU-Z.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\AIDA64\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.AIDA64.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\HiBitUninstaller\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.HiBitUninstaller.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\FixWin\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.FixWin.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\CrystalDiskInfo\**\*.*">
+            <LogicalName>SimpleToolbox.Resources.CrystalDiskInfo.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Remove="ProcessManager.cs" />
+        <Compile Remove="program\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Page Remove="program\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="program\**" />
+    </ItemGroup>
+</Project>

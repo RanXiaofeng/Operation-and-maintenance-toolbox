@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "工具箱", "工具箱.csproj", "{735F605D-4004-47B1-AB2D-BA79607F84FD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{735F605D-4004-47B1-AB2D-BA79607F84FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{735F605D-4004-47B1-AB2D-BA79607F84FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{735F605D-4004-47B1-AB2D-BA79607F84FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{735F605D-4004-47B1-AB2D-BA79607F84FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
