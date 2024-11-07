@@ -4,10 +4,6 @@
         <TrimMode>link</TrimMode>
         <DebugType>none</DebugType>
         <DebugSymbols>false</DebugSymbols>
-        <!-- 可选：启用 AOT 编译 -->
-        <PublishAot>true</PublishAot>
-        <!-- 可选：禁用全球化支持 -->
-        <InvariantGlobalization>true</InvariantGlobalization>
 
         <OutputType>WinExe</OutputType>
         <TargetFramework>net7.0-windows</TargetFramework>
