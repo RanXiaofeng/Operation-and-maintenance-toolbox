@@ -75,14 +75,9 @@ jobs:
       run: |
         foreach ($arch in @('x86', 'x64', 'arm64')) {
           $zipPath = "Toolbox-$arch.zip"
-<<<<<<< HEAD
-          if (Test-Path $zipPath) { Remove-Item $zipPath }
-          Compress-Archive -Path "Toolbox-$arch/*" -DestinationPath $zipPath
-=======
           if (Test-Path $zipPath) { Remove-Item $zipPath } # 清理旧的压缩包
           Compress-Archive -Path "Toolbox-$arch/*" -DestinationPath $zipPath
           echo "Created zip: $zipPath" # 调试信息
->>>>>>> 359deefea682acd91a2ec348557ba0e21cd68297
         }
         
     - name: 生成更新日志
