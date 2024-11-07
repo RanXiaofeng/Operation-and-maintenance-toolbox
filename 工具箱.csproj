@@ -1,10 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <PublishTrimmed>true</PublishTrimmed>
-        <TrimMode>link</TrimMode>
-        <DebugType>none</DebugType>
-        <DebugSymbols>false</DebugSymbols>
-
         <OutputType>WinExe</OutputType>
         <TargetFramework>net7.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
