@@ -31,7 +31,6 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
-    # 获取最新发布版本号
     - name: 获取最新发布版本
       id: get_latest_release
       run: |
@@ -66,13 +65,12 @@ jobs:
           -p:IncludeNativeLibrariesForSelfExtract=true `
           -p:EnableCompressionInSingleFile=true `
           -p:Version=${{ env.VERSION }} `
+          -p:PublishTrimmed=true `
+          -p:TrimMode=link `
+          -p:DebugType=none `
+          -p:DebugSymbols=false `
           -o publish/${{ matrix.architecture }}
 
-    # 删除PDB文件
-    - name: 删除PDB文件
-      run: |
-        Remove-Item -Path "publish/${{ matrix.architecture }}/*.pdb" -Force
-          
     - name: 上传构建产物
       uses: actions/upload-artifact@v3
       with:
@@ -92,9 +90,8 @@ jobs:
       run: |
         foreach ($arch in @('x86', 'x64', 'arm64')) {
           $zipPath = "Toolbox-$arch.zip"
-          if (Test-Path $zipPath) { Remove-Item $zipPath } # 清理旧的压缩包
-          Get-ChildItem -Path "Toolbox-$arch" -Exclude "*.pdb" | Compress-Archive -DestinationPath $zipPath
-          echo "Created zip: $zipPath" # 调试信息
+          if (Test-Path $zipPath) { Remove-Item $zipPath }
+          Get-ChildItem -Path "Toolbox-$arch" | Compress-Archive -DestinationPath $zipPath -CompressionLevel Optimal
         }
         
     - name: 生成更新日志
@@ -119,9 +116,9 @@ jobs:
         - 1GB以上可用空间
         
         ### 🔍 SHA256校验
-        $(foreach($file in Get-ChildItem -Filter "Toolbox-*.zip") {
-          "$($file.Name): $(Get-FileHash $file -Algorithm SHA256).Hash"
-        })
+        $((Get-ChildItem -Filter "Toolbox-*.zip" | ForEach-Object {
+          "$($_.Name): $((Get-FileHash $_.FullName -Algorithm SHA256).Hash)"
+        }) -join "`n")
         "@
         $changeLog | Out-File -FilePath changelog.md -Encoding utf8
         
