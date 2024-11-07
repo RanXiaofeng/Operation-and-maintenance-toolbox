@@ -1,5 +1,4 @@
 name: Build WPF App
-
 on:
   push:
     branches: [ main ]
@@ -7,6 +6,15 @@ on:
     branches: [ main ]
   # 手动触发构建
   workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (例如: 1.0.0)'
+        required: true
+        default: '1.0.0'
+      prerelease:
+        description: '是否为预发布版本'
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -15,7 +23,6 @@ jobs:
       matrix:
         architecture: [x86, x64, arm64]
         configuration: [Release]
-
     steps:
     - name: 检出代码
       uses: actions/checkout@v3
@@ -25,9 +32,18 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
+    - name: 获取版本号
+      id: get_version
+      run: |
+        if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+          echo "VERSION=${{ github.event.inputs.version }}" >> $env:GITHUB_ENV
+        } else {
+          echo "VERSION=1.0.${{ github.run_number }}" >> $env:GITHUB_ENV
+        }
+        
     - name: 还原依赖
       run: dotnet restore -r win-${{ matrix.architecture }}
-
+      
     - name: 构建
       run: |
         dotnet publish 工具箱.csproj `
@@ -37,40 +53,72 @@ jobs:
           -p:PublishSingleFile=true `
           -p:IncludeNativeLibrariesForSelfExtract=true `
           -p:EnableCompressionInSingleFile=true `
+          -p:Version=${{ env.VERSION }} `
           -o publish/${{ matrix.architecture }}
-
+          
     - name: 上传构建产物
       uses: actions/upload-artifact@v3
       with:
-        name: 运维工具箱-${{ matrix.architecture }}
+        name: Toolbox-${{ matrix.architecture }}
         path: publish/${{ matrix.architecture }}
 
   create-release:
     needs: build
     runs-on: windows-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     
     steps:
     - name: 下载所有构建产物
       uses: actions/download-artifact@v3
-
+      
     - name: 创建发布压缩包
       run: |
         foreach ($arch in @('x86', 'x64', 'arm64')) {
-          Compress-Archive -Path "运维工具箱-$arch/*" -DestinationPath "运维工具箱-$arch.zip"
+          $zipPath = "Toolbox-$arch.zip"
+          if (Test-Path $zipPath) { Remove-Item $zipPath }
+          Compress-Archive -Path "Toolbox-$arch/*" -DestinationPath $zipPath
         }
-
+        
+    - name: 生成更新日志
+      id: changelog
+      run: |
+        $changeLog = @"
+        ## 🚀 发布说明
+        
+        ### ✨ 新特性
+        - 集成多款系统优化工具
+        - 一键式工具启动功能
+        - 资源内嵌，无需额外下载
+        
+        ### 📥 下载说明
+        - Toolbox-x64.zip - 64位系统版本
+        - Toolbox-x86.zip - 32位系统版本
+        - Toolbox-arm64.zip - ARM架构版本
+        
+        ### 💻 系统要求
+        - Windows 10/11
+        - .NET 6.0 或更高版本
+        - 1GB以上可用空间
+        
+        ### 🔍 SHA256校验
+        $(foreach($file in Get-ChildItem -Filter "Toolbox-*.zip") {
+          "$($file.Name): $(Get-FileHash $file -Algorithm SHA256).Hash"
+        })
+        "@
+        $changeLog | Out-File -FilePath changelog.md -Encoding utf8
+        
     - name: 创建发布
       id: create_release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
+        tag_name: v${{ env.VERSION }}
+        release_name: 运维工具箱 v${{ env.VERSION }}
+        body_path: changelog.md
         draft: false
-        prerelease: false
+        prerelease: ${{ github.event.inputs.prerelease == 'true' }}
         files: |
-          运维工具箱-x86.zip
-          运维工具箱-x64.zip
-          运维工具箱-arm64.zip
+          Toolbox-x86.zip
+          Toolbox-x64.zip
+          Toolbox-arm64.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
